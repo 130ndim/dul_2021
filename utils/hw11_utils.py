@@ -53,8 +53,8 @@ class Classifier(nn.Module):
         for i in trange(num_epochs, leave=False):
             running_loss = 0
             for (x, y) in data_loader:
-                p = self(x.to(DEVICE))
-                loss = F.cross_entropy(p, y)
+                p = self(x.to(self.device))
+                loss = F.cross_entropy(p, y.to(self.device))
                 optim.zero_grad()
                 loss.backward()
                 optim.step()
