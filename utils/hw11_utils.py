@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.optim as opt
 import torch.utils.data as data
@@ -6,6 +7,9 @@ from torchvision import transforms
 from torchvision.datasets import MNIST, CIFAR10
 
 from .utils import *
+
+
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class Classifier(nn.Module):
@@ -19,6 +23,10 @@ class Classifier(nn.Module):
                                    nn.ReLU(),
                                    nn.Linear(64, 10))
 
+    @property
+    def device(self):
+        return next(self.parameters()).device
+
     def forward(self, x):
         return self.model(x)
 
@@ -27,7 +35,7 @@ class Classifier(nn.Module):
         y_true = []
 
         for (x, y) in dataloader:
-            res = self(x.float())
+            res = self(x.float().to(DEVICE))
             res = torch.argmax(res, dim=-1)
             y_pred.append(res.squeeze().detach().cpu().numpy())
             y_true.append(y.squeeze().detach().cpu().numpy())
@@ -43,7 +51,7 @@ class Classifier(nn.Module):
         for i in range(num_epochs):
             running_loss = 0
             for (x, y) in data_loader:
-                p = self(x)
+                p = self(x.to(DEVICE))
                 loss = F.cross_entropy(p, y)
                 optim.zero_grad()
                 loss.backward()
@@ -74,7 +82,7 @@ def test_classification(test_data, encoder, it=10):
         clf_train = data.TensorDataset(clf_train_data, clf_train_labels)
         clf_test = data.TensorDataset(clf_test_data, clf_test_labels)
 
-        clf = Classifier()
+        clf = Classifier().to(DEVICE)
 
         clf.fit(clf_train)
 
