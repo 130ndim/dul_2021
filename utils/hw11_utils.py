@@ -6,6 +6,8 @@ from sklearn.metrics import accuracy_score
 from torchvision import transforms
 from torchvision.datasets import MNIST, CIFAR10
 
+from tqdm.auto import trange
+
 from .utils import *
 
 
@@ -48,7 +50,7 @@ class Classifier(nn.Module):
 
         data_loader = torch.utils.data.DataLoader(traindata, bs, shuffle=True)
 
-        for i in range(num_epochs):
+        for i in trange(num_epochs, leave=False):
             running_loss = 0
             for (x, y) in data_loader:
                 p = self(x.to(DEVICE))
